@@ -31,6 +31,7 @@ void enigma() {
   char decoded[256];
 
   while (1) {
+
     printf("What is your message that you want encrypted or decrypted? (or "
            "type 'exit' to quit): ");
     if (!fgets(message, sizeof(message), stdin)) {
@@ -71,5 +72,25 @@ void enigma() {
         rotateRotor(&rotor_one);
         if (rotor_one.rotation_count == 0) {
           rotateRotor(&rotor_two);
-          if (rotor
-reeRotor(&rotor_two);
+          if (rotor_two.rotation_count == 0) {
+            rotateRotor(&rotor_three);
+          }
+        }
+      } else {
+        decoded[i] =
+            originalChar; // Non-alphabetic characters are not encrypted
+      }
+    }
+    decoded[len] = '\0';
+    printf("Message: %s\n", decoded);
+  }
+  freePlugBoard(&plugBoard);
+  freeRotor(&rotor_one);
+  freeRotor(&rotor_two);
+  freeRotor(&rotor_three);
+  freeReflector(&reflector);
+}
+int main() {
+  enigma();
+  return 0;
+}
