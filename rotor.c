@@ -4,6 +4,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+// Predefined rotor wirings
+static const char *ROTOR_ONE_WIRING = "EKMFLGDQVZNTOWYHXUSPAIBRCJ";
+static const char *ROTOR_TWO_WIRING = "AJDKSIRUXBLHWTMCQGZNPYFVOE";
+static const char *ROTOR_THREE_WIRING = "BDFHJLCPRTXVZNYEIWGAKMUSQO";
+static const char *ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
 void initializeRotor(struct Rotor *rotor) {
   rotor->side_one = (char *)malloc(ROTOR_SIZE + 1);
   rotor->side_two = (char *)malloc(ROTOR_SIZE + 1);
@@ -13,46 +19,42 @@ void initializeRotor(struct Rotor *rotor) {
     exit(EXIT_FAILURE);
   }
 
+  strcpy(rotor->side_one, ALPHABET);
+
   if (strcmp(rotor->name, "Rotor One") == 0) {
-    strcpy(rotor->side_one, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-    strcpy(rotor->side_two, "EKMFLGDQVZNTOWYHXUSPAIBRCJ");
+    strcpy(rotor->side_two, ROTOR_ONE_WIRING);
   } else if (strcmp(rotor->name, "Rotor Two") == 0) {
-    strcpy(rotor->side_one, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-    strcpy(rotor->side_two, "AJDKSIRUXBLHWTMCQGZNPYFVOE");
+    strcpy(rotor->side_two, ROTOR_TWO_WIRING);
   } else if (strcmp(rotor->name, "Rotor Three") == 0) {
-    strcpy(rotor->side_one, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-    strcpy(rotor->side_two, "BDFHJLCPRTXVZNYEIWGAKMUSQO");
+    strcpy(rotor->side_two, ROTOR_THREE_WIRING);
   }
 
   rotor->rotation_count = 0;
 }
 
 char sendLetterThroughRotor(struct Rotor *rotor, char letter, bool forward) {
-  char *input = forward ? rotor->side_one : rotor->side_two;
-  char *output = forward ? rotor->side_two : rotor->side_one;
+  int index = (letter - 'A' + rotor->rotation_count) % ROTOR_SIZE;
+  char encoded_letter;
 
-  for (int i = 0; i < ROTOR_SIZE; i++) {
-    if (input[i] == letter) {
-      return output[i];
+  if (forward) {
+    encoded_letter = rotor->side_two[index];
+  } else {
+    // Reverse the rotor side_two to find the corresponding letter on side_one
+    for (int i = 0; i < ROTOR_SIZE; i++) {
+      if (rotor->side_two[i] == letter) {
+        encoded_letter =
+            rotor->side_one[(i - rotor->rotation_count + ROTOR_SIZE) %
+                            ROTOR_SIZE];
+        break;
+      }
     }
   }
-  return letter;
+
+  return encoded_letter;
 }
 
 void rotateRotor(struct Rotor *rotor) {
   rotor->rotation_count = (rotor->rotation_count + 1) % ROTOR_SIZE;
-
-  char last_char = rotor->side_one[ROTOR_SIZE - 1];
-  for (int i = ROTOR_SIZE - 1; i > 0; i--) {
-    rotor->side_one[i] = rotor->side_one[i - 1];
-  }
-  rotor->side_one[0] = last_char;
-
-  last_char = rotor->side_two[ROTOR_SIZE - 1];
-  for (int i = ROTOR_SIZE - 1; i > 0; i--) {
-    rotor->side_two[i] = rotor->side_two[i - 1];
-  }
-  rotor->side_two[0] = last_char;
 }
 
 void freeRotor(struct Rotor *rotor) {
