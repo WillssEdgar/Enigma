@@ -6,6 +6,17 @@
 #include <stdio.h>
 #include <string.h>
 
+/**
+ * changePlugBoard - Allows the user to change the plugboard wiring by swapping
+ * pairs of letters.
+ *
+ * @plugBoard: Pointer to the PlugBoard structure that holds the current
+ * plugboard wiring.
+ *
+ * This function prompts the user to input two letters, then swaps their
+ * mappings in the plugboard wiring. The new mappings are printed to the
+ * console.
+ */
 void changePlugBoard(struct PlugBoard *plugBoard) {
   char first_letter;
   char *message = "First letter you would like to change";
@@ -36,6 +47,16 @@ void changePlugBoard(struct PlugBoard *plugBoard) {
          plugBoard->wiring[second_letter_partner - 'A']);
 }
 
+/**
+ * initializePlugBoard - Initializes the plugboard with a predefined set of
+ * wiring mappings.
+ *
+ * @plugBoard: Pointer to the PlugBoard structure that will be initialized.
+ *
+ * This function sets up the initial state of the plugboard by mapping each
+ * letter to itself, and then applying specific swaps to create the predefined
+ * wiring.
+ */
 void initializePlugBoard(struct PlugBoard *plugBoard) {
   for (int i = 0; i < 26; i++) {
     plugBoard->wiring[i] = 'A' + i; // Initialize with 'A' to 'Z'
@@ -68,10 +89,32 @@ void initializePlugBoard(struct PlugBoard *plugBoard) {
   plugBoard->wiring['Z' - 'A'] = 'Y'; // Map 'Z' to 'Y'
 }
 
+/**
+ * sendLetterThroughPlugBoard - Simulates sending a letter through the
+ * plugboard.
+ *
+ * @plugBoard: Pointer to the PlugBoard structure that holds the current
+ * plugboard wiring.
+ * @letter: The letter to be sent through the plugboard.
+ *
+ * This function returns the letter that the input letter is mapped to in the
+ * plugboard wiring.
+ *
+ * Return: The letter mapped to the input letter.
+ */
 char sendLetterThroughPlugBoard(struct PlugBoard *plugBoard, char letter) {
   return plugBoard->wiring[letter - 'A'];
 }
 
+/**
+ * outputPlugBoard - Prints the current state of the plugboard mappings.
+ *
+ * @plugBoard: Pointer to the PlugBoard structure that holds the current
+ * plugboard wiring.
+ *
+ * This function prints the current plugboard mappings to the console in a
+ * formatted manner, showing which letters are mapped to each other.
+ */
 void outputPlugBoard(struct PlugBoard *plugBoard) {
   char *plugboard_string = "------------Current Plug Board-------------";
   int total_width = 100;

@@ -10,7 +10,7 @@ CC = gcc
 # LIBS = `pkg-config --libs gtk+-3.0`
 
 # Source files
-SRCS = enigma.c reflector.c plugBoard.c rotor.c
+SRCS = enigma.c reflector.c plugBoard.c rotor.c globalFunctions.c
 
 # Object files (derived from source files)
 OBJS = $(SRCS:.c=.o)

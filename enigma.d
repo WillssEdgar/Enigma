@@ -1,1 +1,1 @@
-enigma.o: enigma.c plugBoard.h reflector.h rotor.h
+enigma.o: enigma.c globalFunctions.h plugBoard.h reflector.h rotor.h
