@@ -1,20 +1,42 @@
 // Rotor Structure
 #include "plugBoard.h"
+#include "rotor.h"
+#include <ctype.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
+void changePlugBoard(struct PlugBoard *plugBoard) {
+  char first_letter;
+  char *message = "First letter you would like to change";
+  printf("\n%*s %s: ", format_string(message), "", message);
+  scanf(" %c", &first_letter); // Note the space before %c
+  first_letter = toupper(first_letter);
+
+  char second_letter;
+  message = "Second letter you would like to change";
+  printf("%*s %s: ", format_string(message), "", message);
+  scanf(" %c", &second_letter); // Note the space before %c
+  second_letter = toupper(second_letter);
+
+  char first_letter_partner = plugBoard->wiring[first_letter - 'A'];
+  char second_letter_partner = plugBoard->wiring[second_letter - 'A'];
+
+  plugBoard->wiring[first_letter - 'A'] = second_letter;
+  plugBoard->wiring[second_letter - 'A'] = first_letter;
+  plugBoard->wiring[first_letter_partner - 'A'] = second_letter_partner;
+  plugBoard->wiring[second_letter_partner - 'A'] = first_letter_partner;
+  printf("\n%*s New Mappings:\n", format_string("New Mappings:"), "");
+  printf("%48c -> %c \n", first_letter, plugBoard->wiring[first_letter - 'A']);
+  printf("%48c -> %c \n", second_letter,
+         plugBoard->wiring[second_letter - 'A']);
+  printf("%48c -> %c \n", first_letter_partner,
+         plugBoard->wiring[first_letter_partner - 'A']);
+  printf("%48c -> %c \n", second_letter_partner,
+         plugBoard->wiring[second_letter_partner - 'A']);
+}
+
 void initializePlugBoard(struct PlugBoard *plugBoard) {
-  // plugBoard->side_one = (char *)malloc(ROTOR_SIZE + 1);
-  // plugBoard->side_two = (char *)malloc(ROTOR_SIZE + 1);
-  // if (plugBoard->side_one == NULL || plugBoard->side_two == NULL) {
-  //   fprintf(stderr, "Memory allocation failed\n");
-  //   exit(EXIT_FAILURE);
-  // }
-  // strcpy(plugBoard->side_one, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-  // strcpy(plugBoard->side_two, "ZPHNMSWCIYTQEDOBLRFKUVGXJA");
-  // Start with a direct mapping (no plugs)
   for (int i = 0; i < 26; i++) {
     plugBoard->wiring[i] = 'A' + i; // Initialize with 'A' to 'Z'
   }
@@ -59,11 +81,10 @@ void outputPlugBoard(struct PlugBoard *plugBoard) {
   printf("%*s%s%*s\n\n", padding, "", plugboard_string, padding, "");
   for (int i = 0; i < 26; i++) {
     char currentLetter = 'A' + i;
-    char toLetter = currentLetter - 'A';
     if (i % 2 == 0) {
-      printf("%37c -> %c", currentLetter, plugBoard->wiring[toLetter]);
+      printf("%37c -> %c", currentLetter, plugBoard->wiring[i]);
     } else {
-      printf("%15c -> %c\n", currentLetter, plugBoard->wiring[toLetter]);
+      printf("%15c -> %c\n", currentLetter, plugBoard->wiring[i]);
     }
   }
 }

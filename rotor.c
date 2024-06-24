@@ -9,6 +9,13 @@ static const char *ROTOR_ONE_WIRING = "EKMFLGDQVZNTOWYHXUSPAIBRCJ";
 static const char *ROTOR_TWO_WIRING = "AJDKSIRUXBLHWTMCQGZNPYFVOE";
 static const char *ROTOR_THREE_WIRING = "BDFHJLCPRTXVZNYEIWGAKMUSQO";
 static const char *ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+#define WIDTH 100
+
+int format_string(char *message) {
+  int str_len = strlen(message);
+  int padding = (WIDTH - str_len) / 2;
+  return padding;
+}
 
 void initializeRotor(struct Rotor *rotor) {
   rotor->side_one = (char *)malloc(ROTOR_SIZE + 1);
@@ -55,6 +62,49 @@ char sendLetterThroughRotor(struct Rotor *rotor, char letter, bool forward) {
 
 void rotateRotor(struct Rotor *rotor) {
   rotor->rotation_count = (rotor->rotation_count + 1) % ROTOR_SIZE;
+}
+
+void outputRotors(struct Rotor *rotor_one, struct Rotor *rotor_two,
+                  struct Rotor *rotor_three) {
+
+  char *setup = "-------------Current Rotor Setup-------------";
+  printf("\n%*s%s\n\n", format_string(setup), "", setup);
+  printf("%*s%s: %d\n%*s%s: %d\n%*s%s: %d\n", format_string(rotor_one->name),
+         "", rotor_one->name, rotor_one->rotation_count,
+         format_string(rotor_two->name), "", rotor_two->name,
+         rotor_two->rotation_count, format_string(rotor_three->name), "",
+         rotor_three->name, rotor_three->rotation_count
+
+  );
+}
+
+void changeRotors(struct Rotor *rotor_one, struct Rotor *rotor_two,
+                  struct Rotor *rotor_three) {
+
+  char *rotor_one_message =
+      " What is the Rotor setup you would like for Rotor One?(Please put "
+      "an integer 0-25): ";
+  printf("\n%*s%s", format_string(rotor_one_message), "", rotor_one_message);
+  int rotor_one_count;
+  scanf("%d", &rotor_one_count);
+
+  char *rotor_two_message = " What is the Rotor setup you would like for Rotor "
+                            "Two?(Please put an integer 0-25): ";
+  printf("\n%*s%s", format_string(rotor_two_message), "", rotor_two_message);
+  int rotor_two_count;
+  scanf("%d", &rotor_two_count);
+
+  char *rotor_three_message =
+      " What is the Rotor setup you would like for Rotor "
+      "Three?(Please put an integer 0-25): ";
+  printf("\n%*s%s", format_string(rotor_three_message), "",
+         rotor_three_message);
+  int rotor_three_count;
+  scanf("%d", &rotor_three_count);
+
+  rotor_one->rotation_count = rotor_one_count;
+  rotor_two->rotation_count = rotor_two_count;
+  rotor_three->rotation_count = rotor_three_count;
 }
 
 void freeRotor(struct Rotor *rotor) {

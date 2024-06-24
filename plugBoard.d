@@ -1,1 +1,1 @@
-plugBoard.o: plugBoard.c plugBoard.h
+plugBoard.o: plugBoard.c plugBoard.h rotor.h

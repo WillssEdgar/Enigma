@@ -16,6 +16,12 @@ struct Rotor {
 void initializeRotor(struct Rotor *rotor);
 char sendLetterThroughRotor(struct Rotor *rotor, char letter, bool forward);
 void rotateRotor(struct Rotor *rotor);
+int format_string(char *message);
+void outputRotors(struct Rotor *rotor_one, struct Rotor *rotor_two,
+                  struct Rotor *rotor_three);
+void changeRotors(struct Rotor *rotor_one, struct Rotor *rotor_two,
+                  struct Rotor *rotor_three);
+
 void freeRotor(struct Rotor *rotor);
 
 #endif // ROTOR_H
