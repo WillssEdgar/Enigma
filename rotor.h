@@ -43,6 +43,38 @@ void initializeRotor(struct Rotor *rotor);
 char sendLetterThroughRotor(struct Rotor *rotor, char letter, bool forward);
 
 /**
+ * encode - Encodes a given message using the Enigma machine settings.
+ *
+ * @rotor_one: The first rotor.
+ * @rotor_two: The second  rotor.
+ * @rotor_three: The rotor.
+ * @message: The message to be encoded.
+ *
+ * This function initializes the plug board, rotors, and reflector of the Enigma
+ * machine. It then encodes the provided message by passing each character
+ * through the plug board, rotors, and reflector, and then back through the
+ * rotors and plug board. The encoded message is printed to the console.
+ */
+void encode(struct Rotor *rotor_one, struct Rotor *rotor_two,
+            struct Rotor *rotor_three, char *message);
+
+/**
+ * decode - Decodes a given message using the Enigma machine settings.
+ *
+ * @rotor_one_number: The initial position of the first rotor.
+ * @rotor_two_number: The initial position of the second rotor.
+ * @rotor_three_number: The initial position of the third rotor.
+ * @message: The message to be decoded.
+ *
+ * This function initializes the plug board, rotors, and reflector of the Enigma
+ * machine. It then decodes the provided message by passing each character
+ * through the plug board, rotors, and reflector, and then back through the
+ * rotors and plug board. The decoded message is printed to the console.
+ */
+void decode(struct Rotor *rotor_one, struct Rotor *rotor_two,
+            struct Rotor *rotor_three, char *message);
+
+/**
  * rotateRotor - Rotates the rotor by one position.
  *
  * @rotor: A pointer to the Rotor structure.

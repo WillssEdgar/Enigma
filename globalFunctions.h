@@ -16,36 +16,4 @@
  */
 int menu();
 
-/**
- * encode - Encodes a given message using the Enigma machine settings.
- *
- * @rotor_one_number: The initial position of the first rotor.
- * @rotor_two_number: The initial position of the second rotor.
- * @rotor_three_number: The initial position of the third rotor.
- * @message: The message to be encoded.
- *
- * This function initializes the plug board, rotors, and reflector of the Enigma
- * machine. It then encodes the provided message by passing each character
- * through the plug board, rotors, and reflector, and then back through the
- * rotors and plug board. The encoded message is printed to the console.
- */
-void encode(int rotor_one_number, int rotor_two_number, int rotor_three_number,
-            char *message);
-
-/**
- * decode - Decodes a given message using the Enigma machine settings.
- *
- * @rotor_one_number: The initial position of the first rotor.
- * @rotor_two_number: The initial position of the second rotor.
- * @rotor_three_number: The initial position of the third rotor.
- * @message: The message to be decoded.
- *
- * This function initializes the plug board, rotors, and reflector of the Enigma
- * machine. It then decodes the provided message by passing each character
- * through the plug board, rotors, and reflector, and then back through the
- * rotors and plug board. The decoded message is printed to the console.
- */
-void decode(int rotor_one_number, int rotor_two_number, int rotor_three_number,
-            char *message);
-
 #endif // ROTOR_H

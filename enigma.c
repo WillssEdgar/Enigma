@@ -1,4 +1,3 @@
-
 #include "globalFunctions.h"
 #include "plugBoard.h"
 #include "reflector.h"
@@ -66,8 +65,9 @@ void enigma() {
         return;
       }
 
-      encode(rotor_one.rotation_count, rotor_two.rotation_count,
-             rotor_three.rotation_count, message);
+      encode(&rotor_one, &rotor_two, &rotor_three, message);
+
+      outputRotors(&rotor_one, &rotor_two, &rotor_three);
       break;
     case 2:
       outputRotors(&rotor_one, &rotor_two, &rotor_three);
@@ -87,8 +87,7 @@ void enigma() {
         return;
       }
 
-      decode(rotor_one.rotation_count, rotor_two.rotation_count,
-             rotor_three.rotation_count, message);
+      decode(&rotor_one, &rotor_two, &rotor_three, message);
       break;
 
     case 3:

@@ -1,1 +1,1 @@
-globalFunctions.o: globalFunctions.c plugBoard.h reflector.h rotor.h
+globalFunctions.o: globalFunctions.c rotor.h

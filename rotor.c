@@ -1,9 +1,10 @@
-
 #include "rotor.h"
+#include "plugBoard.h"
+#include "reflector.h"
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 // Predefined rotor wirings
 static const char *ROTOR_ONE_WIRING = "EKMFLGDQVZNTOWYHXUSPAIBRCJ";
 static const char *ROTOR_TWO_WIRING = "AJDKSIRUXBLHWTMCQGZNPYFVOE";
@@ -107,6 +108,21 @@ char sendLetterThroughRotor(struct Rotor *rotor, char letter, bool forward) {
  */
 void rotateRotor(struct Rotor *rotor) {
   rotor->rotation_count = (rotor->rotation_count + 1) % ROTOR_SIZE;
+  int side_one_length = strlen(rotor->side_one);
+  char side_one_last_character = rotor->side_one[side_one_length - 1];
+  char temp_list[256];
+  for (int i = 0; i < side_one_length; i++) {
+    if (i == 0) {
+      temp_list[i] = side_one_last_character;
+    } else {
+      temp_list[i] = rotor->side_one[i - 1];
+    }
+  }
+  // Null-terminate the rotated string
+  temp_list[side_one_length] = '\0';
+
+  // Copy the rotated string back to rotor->side_one
+  strncpy(rotor->side_one, temp_list, side_one_length + 1);
 }
 
 /**
@@ -171,6 +187,163 @@ void changeRotors(struct Rotor *rotor_one, struct Rotor *rotor_two,
   rotor_one->rotation_count = rotor_one_count;
   rotor_two->rotation_count = rotor_two_count;
   rotor_three->rotation_count = rotor_three_count;
+}
+
+/**
+ * encode - Encodes a given message using the Enigma machine settings.
+ *
+ * @rotor_one_number: The initial position of the first rotor.
+ * @rotor_two_number: The initial position of the second rotor.
+ * @rotor_three_number: The initial position of the third rotor.
+ * @message: The message to be encoded.
+ *
+ * This function initializes the plug board, rotors, and reflector of the Enigma
+ * machine. It then encodes the provided message by passing each character
+ * through the plug board, rotors, and reflector, and then back through the
+ * rotors and plug board. The encoded message is printed to the console.
+ */
+void encode(struct Rotor *rotor_one, struct Rotor *rotor_two,
+            struct Rotor *rotor_three, char *message) {
+  char encoded[256];
+  struct PlugBoard plugBoard;
+  initializePlugBoard(&plugBoard);
+
+  // struct Rotor rotor_one = {"Rotor One", NULL, NULL, rotor_one_number};
+  // initializeRotor(&rotor_one);
+  // struct Rotor rotor_two = {"Rotor Two", NULL, NULL, rotor_two_number};
+  // initializeRotor(&rotor_two);
+  // struct Rotor rotor_three = {"Rotor Three", NULL, NULL, rotor_three_number};
+  // initializeRotor(&rotor_three);
+  struct Reflector reflector;
+  initializeReflector(&reflector);
+
+  size_t len = strlen(message);
+  if (message[len - 1] == '\n') {
+    message[len - 1] = '\0';
+  }
+
+  if (strcmp(message, "exit") == 0) {
+    freeRotor(rotor_one);
+    freeRotor(rotor_two);
+    freeRotor(rotor_three);
+    freeReflector(&reflector);
+    return;
+  }
+
+  // Convert entire message to uppercase
+  for (size_t i = 0; i < len; i++) {
+    message[i] = toupper(message[i]);
+  }
+
+  for (size_t i = 0; i < len; i++) {
+    char originalChar = message[i];
+
+    if (originalChar >= 'A' && originalChar <= 'Z') {
+      char newChar = sendLetterThroughPlugBoard(&plugBoard, originalChar);
+      newChar = sendLetterThroughRotor(rotor_one, newChar, true);
+      newChar = sendLetterThroughRotor(rotor_two, newChar, true);
+      newChar = sendLetterThroughRotor(rotor_three, newChar, true);
+      newChar = sendLetterThroughReflector(&reflector, newChar);
+      newChar = sendLetterThroughRotor(rotor_three, newChar, false);
+      newChar = sendLetterThroughRotor(rotor_two, newChar, false);
+      newChar = sendLetterThroughRotor(rotor_one, newChar, false);
+      newChar = sendLetterThroughPlugBoard(&plugBoard, newChar);
+      encoded[i] = newChar;
+
+      // Rotate rotors
+      rotateRotor(rotor_one);
+      printf("Rotor settings: %d\n", rotor_one->rotation_count);
+      printf("Rotor settings: %s\n", rotor_one->side_one);
+      if (rotor_one->rotation_count == 0) {
+        rotateRotor(rotor_two);
+        if (rotor_two->rotation_count == 0) {
+          rotateRotor(rotor_three);
+        }
+      }
+
+    } else {
+      encoded[i] = originalChar; // Non-alphabetic characters are not encrypted
+    }
+  }
+
+  printf("Rotation count after: %d", rotor_one->rotation_count);
+  encoded[len] = '\0';
+  char *message_string = "Message";
+  printf("\n%*s : %s\n", format_string(message_string), message_string,
+         encoded);
+}
+
+/**
+ * decode - Decodes a given message using the Enigma machine settings.
+ *
+ * @rotor_one_number: The initial position of the first rotor.
+ * @rotor_two_number: The initial position of the second rotor.
+ * @rotor_three_number: The initial position of the third rotor.
+ * @message: The message to be decoded.
+ *
+ * This function initializes the plug board, rotors, and reflector of the Enigma
+ * machine. It then decodes the provided message by passing each character
+ * through the plug board, rotors, and reflector, and then back through the
+ * rotors and plug board. The decoded message is printed to the console.
+ */
+void decode(struct Rotor *rotor_one, struct Rotor *rotor_two,
+            struct Rotor *rotor_three, char *message) {
+  char decoded[256];
+  struct PlugBoard plugBoard;
+  initializePlugBoard(&plugBoard);
+
+  struct Reflector reflector;
+  initializeReflector(&reflector);
+
+  size_t len = strlen(message);
+  if (message[len - 1] == '\n') {
+    message[len - 1] = '\0';
+  }
+
+  if (strcmp(message, "exit") == 0) {
+    freeRotor(rotor_one);
+    freeRotor(rotor_two);
+    freeRotor(rotor_three);
+    freeReflector(&reflector);
+    return;
+  }
+
+  // Convert entire message to uppercase
+  for (size_t i = 0; i < len; i++) {
+    message[i] = toupper(message[i]);
+  }
+
+  for (size_t i = 0; i < len; i++) {
+    char originalChar = message[i];
+
+    if (originalChar >= 'A' && originalChar <= 'Z') {
+      char newChar = sendLetterThroughPlugBoard(&plugBoard, originalChar);
+      newChar = sendLetterThroughRotor(rotor_one, newChar, true);
+      newChar = sendLetterThroughRotor(rotor_two, newChar, true);
+      newChar = sendLetterThroughRotor(rotor_three, newChar, true);
+      newChar = sendLetterThroughReflector(&reflector, newChar);
+      newChar = sendLetterThroughRotor(rotor_three, newChar, false);
+      newChar = sendLetterThroughRotor(rotor_two, newChar, false);
+      newChar = sendLetterThroughRotor(rotor_one, newChar, false);
+      newChar = sendLetterThroughPlugBoard(&plugBoard, newChar);
+      decoded[i] = newChar;
+
+      // Rotate rotors
+      rotateRotor(rotor_one);
+      if (rotor_one->rotation_count == 0) {
+        rotateRotor(rotor_two);
+        if (rotor_two->rotation_count == 0) {
+          rotateRotor(rotor_three);
+        }
+      }
+    } else {
+      decoded[i] = originalChar; // Non-alphabetic characters are not encrypted
+    }
+  }
+  decoded[len] = '\0';
+  char *message_string = "Message";
+  printf("\n%*s : %s\n", format_string(message_string), message_string,
+         decoded);
 }
 
 /**
