@@ -1,3 +1,4 @@
+
 #include "globalFunctions.h"
 #include "plugBoard.h"
 #include "reflector.h"
@@ -10,20 +11,16 @@
 #define ROTOR_SIZE 26
 #define WIDTH 100
 
-/**
- * @brief Runs the Enigma machine simulation.
- *
- * This function initializes the components of the Enigma machine
- * (plug board, rotors, and reflector) and provides a menu for the user
- * to interact with the machine. The user can encrypt or decrypt messages,
- * change the plug board settings, and change the rotor settings.
- */
 void enigma() {
+  printf("start of engima function");
   struct PlugBoard plugBoard;
   initializePlugBoard(&plugBoard);
 
   struct Rotor rotor_one = {"Rotor One", NULL, NULL, 0};
   initializeRotor(&rotor_one);
+  printf("This is rotor_one side at the beginning:\n Side One: %s\n Side Two: "
+         "%s\n",
+         rotor_one.side_one, rotor_one.side_two);
 
   struct Rotor rotor_two = {"Rotor Two", NULL, NULL, 0};
   initializeRotor(&rotor_two);
@@ -35,25 +32,25 @@ void enigma() {
   initializeReflector(&reflector);
 
   char message[256];
+  char *prompt;
 
-  char *strang;
   while (1) {
+    printf("start of while loop");
     int result = menu();
 
     switch (result) {
     case 1:
       outputRotors(&rotor_one, &rotor_two, &rotor_three);
 
-      strang = "What is your message that you want encrypted?: ";
-
-      printf("%*s%s", format_string(strang), "", strang);
+      prompt = "What is your message that you want encrypted?: ";
+      printf("%*s%s", format_string(prompt), "", prompt);
       if (!fgets(message, sizeof(message), stdin)) {
         break; // End of input
       }
 
       // Remove newline character if present
       size_t len = strlen(message);
-      if (message[len - 1] == '\n') {
+      if (len > 0 && message[len - 1] == '\n') {
         message[len - 1] = '\0';
       }
 
@@ -61,39 +58,44 @@ void enigma() {
         freeRotor(&rotor_one);
         freeRotor(&rotor_two);
         freeRotor(&rotor_three);
-        freeReflector(&reflector);
         return;
       }
 
       encode(&rotor_one, &rotor_two, &rotor_three, message);
-
       outputRotors(&rotor_one, &rotor_two, &rotor_three);
       break;
+
     case 2:
       outputRotors(&rotor_one, &rotor_two, &rotor_three);
 
-      strang = "What is your message that you want decrypted?: ";
-
-      printf("%*s%s", format_string(strang), "", strang);
+      prompt = "What is your message that you want decrypted?: ";
+      printf("%*s%s", format_string(prompt), "", prompt);
       if (!fgets(message, sizeof(message), stdin)) {
         break; // End of input
+      }
+
+      // Remove newline character if present
+      len = strlen(message);
+      if (len > 0 && message[len - 1] == '\n') {
+        message[len - 1] = '\0';
       }
 
       if (strcmp(message, "exit") == 0) {
         freeRotor(&rotor_one);
         freeRotor(&rotor_two);
         freeRotor(&rotor_three);
-        freeReflector(&reflector);
         return;
       }
 
       decode(&rotor_one, &rotor_two, &rotor_three, message);
+      outputRotors(&rotor_one, &rotor_two, &rotor_three);
       break;
 
     case 3:
       outputPlugBoard(&plugBoard);
       changePlugBoard(&plugBoard);
       break;
+
     case 4:
       changeRotors(&rotor_one, &rotor_two, &rotor_three);
       break;
@@ -101,7 +103,11 @@ void enigma() {
     case 5:
       outputRotors(&rotor_one, &rotor_two, &rotor_three);
       break;
+
     case 6:
+      freeRotor(&rotor_one);
+      freeRotor(&rotor_two);
+      freeRotor(&rotor_three);
       return;
 
     default:
@@ -111,15 +117,8 @@ void enigma() {
   }
 }
 
-/**
- * @brief The main function of the program.
- *
- * This function calls the enigma function to start the Enigma machine
- * simulation.
- *
- * @return int Return status of the program (0 for success).
- */
 int main() {
+  printf("engima starts");
   enigma();
   return 0;
 }

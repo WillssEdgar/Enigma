@@ -1,7 +1,4 @@
 #include "reflector.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 /**
  * sendLetterThroughReflector - Simulates sending a letter through the
@@ -19,12 +16,7 @@
  * Return: The letter mapped to the input letter by the reflector.
  */
 char sendLetterThroughReflector(struct Reflector *reflector, char letter) {
-  for (int i = 0; i < ROTOR_SIZE; i++) {
-    if (reflector->side_one[i] == letter) {
-      return reflector->side_two[i];
-    }
-  }
-  return letter;
+  return reflector->wiring[letter - 'A'];
 }
 
 /**
@@ -38,26 +30,45 @@ char sendLetterThroughReflector(struct Reflector *reflector, char letter) {
  * the program.
  */
 void initializeReflector(struct Reflector *reflector) {
-  reflector->side_one = (char *)malloc(ROTOR_SIZE + 1);
-  reflector->side_two = (char *)malloc(ROTOR_SIZE + 1);
-  if (reflector->side_one == NULL || reflector->side_two == NULL) {
-    fprintf(stderr, "Memory allocation failed\n");
-    exit(EXIT_FAILURE);
+  for (int i = 0; i < 26; i++) {
+    reflector->wiring[i] = 'A' + i; // Initialize with 'A' to 'Z'
   }
-  strcpy(reflector->side_one, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-  strcpy(reflector->side_two, "YRUHQSLDPXNGOKMIEBFZCWVJAT");
-}
+  reflector->wiring['Y' - 'A'] = 'A';
+  reflector->wiring['A' - 'A'] = 'Y';
 
-/**
- * freeReflector - Frees the memory allocated for the reflector.
- *
- * @reflector: Pointer to the Reflector structure whose memory needs to be
- * freed.
- *
- * This function frees the memory allocated for `side_one` and `side_two` of the
- * reflector.
- */
-void freeReflector(struct Reflector *reflector) {
-  free(reflector->side_one);
-  free(reflector->side_two);
+  reflector->wiring['B' - 'A'] = 'R';
+  reflector->wiring['R' - 'A'] = 'B';
+
+  reflector->wiring['C' - 'A'] = 'U';
+  reflector->wiring['U' - 'A'] = 'C';
+
+  reflector->wiring['D' - 'A'] = 'H';
+  reflector->wiring['H' - 'A'] = 'D';
+
+  reflector->wiring['E' - 'A'] = 'Q';
+  reflector->wiring['Q' - 'A'] = 'E';
+
+  reflector->wiring['G' - 'A'] = 'L';
+  reflector->wiring['L' - 'A'] = 'G';
+
+  reflector->wiring['W' - 'A'] = 'V';
+  reflector->wiring['V' - 'A'] = 'W';
+
+  reflector->wiring['I' - 'A'] = 'P';
+  reflector->wiring['P' - 'A'] = 'I';
+
+  reflector->wiring['J' - 'A'] = 'X';
+  reflector->wiring['X' - 'A'] = 'J';
+
+  reflector->wiring['K' - 'A'] = 'N';
+  reflector->wiring['N' - 'A'] = 'K';
+
+  reflector->wiring['T' - 'A'] = 'Z';
+  reflector->wiring['Z' - 'A'] = 'T';
+
+  reflector->wiring['M' - 'A'] = 'O';
+  reflector->wiring['O' - 'A'] = 'M';
+
+  reflector->wiring['F' - 'A'] = 'S';
+  reflector->wiring['S' - 'A'] = 'F';
 }

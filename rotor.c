@@ -56,6 +56,9 @@ void initializeRotor(struct Rotor *rotor) {
     strcpy(rotor->side_two, ROTOR_TWO_WIRING);
   } else if (strcmp(rotor->name, "Rotor Three") == 0) {
     strcpy(rotor->side_two, ROTOR_THREE_WIRING);
+  } else {
+    fprintf(stderr, "Unknown rotor name: %s\n", rotor->name);
+    exit(EXIT_FAILURE);
   }
 
   rotor->rotation_count = 0;
@@ -78,12 +81,13 @@ void initializeRotor(struct Rotor *rotor) {
  */
 char sendLetterThroughRotor(struct Rotor *rotor, char letter, bool forward) {
   int index = (letter - 'A' + rotor->rotation_count) % ROTOR_SIZE;
+  if (index < 0)
+    index += ROTOR_SIZE; // Ensure positive index
   char encoded_letter;
 
   if (forward) {
     encoded_letter = rotor->side_two[index];
   } else {
-    // Reverse the rotor side_two to find the corresponding letter on side_one
     for (int i = 0; i < ROTOR_SIZE; i++) {
       if (rotor->side_two[i] == letter) {
         encoded_letter =
@@ -92,6 +96,7 @@ char sendLetterThroughRotor(struct Rotor *rotor, char letter, bool forward) {
         break;
       }
     }
+    // encoded_letter = rotor->side_one[index];
   }
 
   return encoded_letter;
@@ -108,21 +113,22 @@ char sendLetterThroughRotor(struct Rotor *rotor, char letter, bool forward) {
  */
 void rotateRotor(struct Rotor *rotor) {
   rotor->rotation_count = (rotor->rotation_count + 1) % ROTOR_SIZE;
-  int side_one_length = strlen(rotor->side_one);
-  char side_one_last_character = rotor->side_one[side_one_length - 1];
-  char temp_list[256];
-  for (int i = 0; i < side_one_length; i++) {
-    if (i == 0) {
-      temp_list[i] = side_one_last_character;
-    } else {
-      temp_list[i] = rotor->side_one[i - 1];
-    }
-  }
-  // Null-terminate the rotated string
-  temp_list[side_one_length] = '\0';
 
-  // Copy the rotated string back to rotor->side_one
-  strncpy(rotor->side_one, temp_list, side_one_length + 1);
+  char temp_two[27]; // Ensure enough space for null terminator
+
+  // Copy elements, starting from the second last to the first
+  for (int i = 24; i >= 0; i--) {
+
+    temp_two[i + 1] = rotor->side_two[i];
+  }
+
+  // Add the last element of rotor->side_two as the first element of temp_two
+  temp_two[0] = rotor->side_two[25];
+
+  // Null-terminate the temp_two array
+  temp_two[26] = '\0';
+
+  strcpy(rotor->side_two, temp_two);
 }
 
 /**
@@ -202,32 +208,20 @@ void changeRotors(struct Rotor *rotor_one, struct Rotor *rotor_two,
  * through the plug board, rotors, and reflector, and then back through the
  * rotors and plug board. The encoded message is printed to the console.
  */
+
 void encode(struct Rotor *rotor_one, struct Rotor *rotor_two,
             struct Rotor *rotor_three, char *message) {
   char encoded[256];
   struct PlugBoard plugBoard;
   initializePlugBoard(&plugBoard);
 
-  // struct Rotor rotor_one = {"Rotor One", NULL, NULL, rotor_one_number};
-  // initializeRotor(&rotor_one);
-  // struct Rotor rotor_two = {"Rotor Two", NULL, NULL, rotor_two_number};
-  // initializeRotor(&rotor_two);
-  // struct Rotor rotor_three = {"Rotor Three", NULL, NULL, rotor_three_number};
-  // initializeRotor(&rotor_three);
   struct Reflector reflector;
   initializeReflector(&reflector);
 
   size_t len = strlen(message);
   if (message[len - 1] == '\n') {
     message[len - 1] = '\0';
-  }
-
-  if (strcmp(message, "exit") == 0) {
-    freeRotor(rotor_one);
-    freeRotor(rotor_two);
-    freeRotor(rotor_three);
-    freeReflector(&reflector);
-    return;
+    len--;
   }
 
   // Convert entire message to uppercase
@@ -240,37 +234,44 @@ void encode(struct Rotor *rotor_one, struct Rotor *rotor_two,
 
     if (originalChar >= 'A' && originalChar <= 'Z') {
       char newChar = sendLetterThroughPlugBoard(&plugBoard, originalChar);
+      printf("plugboard encode forward: %c\n", newChar);
       newChar = sendLetterThroughRotor(rotor_one, newChar, true);
+      printf("rotor one encode forward: %c\n", newChar);
       newChar = sendLetterThroughRotor(rotor_two, newChar, true);
+      printf("rotor two encode forward: %c\n", newChar);
       newChar = sendLetterThroughRotor(rotor_three, newChar, true);
+      printf("rotor three encode forward: %c\n", newChar);
       newChar = sendLetterThroughReflector(&reflector, newChar);
+      printf("reflector encode forward: %c\n", newChar);
       newChar = sendLetterThroughRotor(rotor_three, newChar, false);
+      printf("rotor three encode back: %c\n", newChar);
       newChar = sendLetterThroughRotor(rotor_two, newChar, false);
+      printf("rotor two encode back: %c\n", newChar);
       newChar = sendLetterThroughRotor(rotor_one, newChar, false);
+      printf("rotor one encode back: %c\n", newChar);
       newChar = sendLetterThroughPlugBoard(&plugBoard, newChar);
+      printf("plugboard encode forward: %c\n", newChar);
       encoded[i] = newChar;
 
       // Rotate rotors
+      printf("Before Rotate: \n Side One: %s\n Side Two: %s\n",
+             rotor_one->side_one, rotor_one->side_two);
       rotateRotor(rotor_one);
-      printf("Rotor settings: %d\n", rotor_one->rotation_count);
-      printf("Rotor settings: %s\n", rotor_one->side_one);
+      printf("After Rotate: \n Side One: %s\n Side Two: %s\n",
+             rotor_one->side_one, rotor_one->side_two);
       if (rotor_one->rotation_count == 0) {
         rotateRotor(rotor_two);
         if (rotor_two->rotation_count == 0) {
           rotateRotor(rotor_three);
         }
       }
-
     } else {
       encoded[i] = originalChar; // Non-alphabetic characters are not encrypted
     }
   }
 
-  printf("Rotation count after: %d", rotor_one->rotation_count);
   encoded[len] = '\0';
-  char *message_string = "Message";
-  printf("\n%*s : %s\n", format_string(message_string), message_string,
-         encoded);
+  printf("\nMessage: %s\n", encoded);
 }
 
 /**
@@ -300,18 +301,15 @@ void decode(struct Rotor *rotor_one, struct Rotor *rotor_two,
     message[len - 1] = '\0';
   }
 
-  if (strcmp(message, "exit") == 0) {
-    freeRotor(rotor_one);
-    freeRotor(rotor_two);
-    freeRotor(rotor_three);
-    freeReflector(&reflector);
-    return;
-  }
-
   // Convert entire message to uppercase
   for (size_t i = 0; i < len; i++) {
     message[i] = toupper(message[i]);
   }
+
+  // Initialize rotors (ensure they are properly set up)
+  initializeRotor(rotor_one);
+  initializeRotor(rotor_two);
+  initializeRotor(rotor_three);
 
   for (size_t i = 0; i < len; i++) {
     char originalChar = message[i];
@@ -340,10 +338,9 @@ void decode(struct Rotor *rotor_one, struct Rotor *rotor_two,
       decoded[i] = originalChar; // Non-alphabetic characters are not encrypted
     }
   }
+
   decoded[len] = '\0';
-  char *message_string = "Message";
-  printf("\n%*s : %s\n", format_string(message_string), message_string,
-         decoded);
+  printf("\nDecoded Message: %s\n", decoded);
 }
 
 /**

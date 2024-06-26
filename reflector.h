@@ -2,10 +2,9 @@
 #define REFLECTOR_H
 
 #define ROTOR_SIZE 26
-// Reflector Structure
+
 struct Reflector {
-  char *side_one;
-  char *side_two;
+  char wiring[26];
 };
 
 // Function prototypes related to the struct
@@ -38,14 +37,4 @@ char sendLetterThroughReflector(struct Reflector *reflector, char letter);
  */
 void initializeReflector(struct Reflector *reflector);
 
-/**
- * freeReflector - Frees the memory allocated for the reflector.
- *
- * @reflector: Pointer to the Reflector structure whose memory needs to be
- * freed.
- *
- * This function frees the memory allocated for `side_one` and `side_two` of the
- * reflector.
- */
-void freeReflector(struct Reflector *reflector);
 #endif // REFLECTOR_H
