@@ -86,17 +86,17 @@ char sendLetterThroughRotor(struct Rotor *rotor, char letter, bool forward) {
   char encoded_letter;
 
   if (forward) {
-    encoded_letter = rotor->side_two[index];
+    for (int i = 0; i < ROTOR_SIZE; i++) {
+      if (rotor->side_one[i] == letter) {
+        encoded_letter = rotor->side_two[i];
+      }
+    }
   } else {
     for (int i = 0; i < ROTOR_SIZE; i++) {
       if (rotor->side_two[i] == letter) {
-        encoded_letter =
-            rotor->side_one[(i - rotor->rotation_count + ROTOR_SIZE) %
-                            ROTOR_SIZE];
-        break;
+        encoded_letter = rotor->side_one[i];
       }
     }
-    // encoded_letter = rotor->side_one[index];
   }
 
   return encoded_letter;
@@ -112,21 +112,21 @@ char sendLetterThroughRotor(struct Rotor *rotor, char letter, bool forward) {
  * rotor size.
  */
 void rotateRotor(struct Rotor *rotor) {
+
   rotor->rotation_count = (rotor->rotation_count + 1) % ROTOR_SIZE;
 
-  char temp_two[27]; // Ensure enough space for null terminator
+  char temp_two[ROTOR_SIZE + 1]; // Ensure enough space for null terminator
 
   // Copy elements, starting from the second last to the first
-  for (int i = 24; i >= 0; i--) {
-
+  for (int i = ROTOR_SIZE - 2; i >= 0; i--) {
     temp_two[i + 1] = rotor->side_two[i];
   }
 
   // Add the last element of rotor->side_two as the first element of temp_two
-  temp_two[0] = rotor->side_two[25];
+  temp_two[0] = rotor->side_two[ROTOR_SIZE - 1];
 
   // Null-terminate the temp_two array
-  temp_two[26] = '\0';
+  temp_two[ROTOR_SIZE] = '\0';
 
   strcpy(rotor->side_two, temp_two);
 }
@@ -169,30 +169,42 @@ void outputRotors(struct Rotor *rotor_one, struct Rotor *rotor_two,
 void changeRotors(struct Rotor *rotor_one, struct Rotor *rotor_two,
                   struct Rotor *rotor_three) {
 
-  char *rotor_one_message =
-      " What is the Rotor setup you would like for Rotor One?(Please put "
-      "an integer 0-25): ";
-  printf("\n%*s%s", format_string(rotor_one_message), "", rotor_one_message);
-  int rotor_one_count;
-  scanf("%d", &rotor_one_count);
+  int rotor_one_count, rotor_two_count, rotor_three_count;
 
-  char *rotor_two_message = " What is the Rotor setup you would like for Rotor "
-                            "Two?(Please put an integer 0-25): ";
-  printf("\n%*s%s", format_string(rotor_two_message), "", rotor_two_message);
-  int rotor_two_count;
-  scanf("%d", &rotor_two_count);
+  char *rotor_one_message =
+      "What is the Rotor setup you would like for Rotor One?(Please put "
+      "an integer 0-25)";
+  char *rotor_two_message = "What is the Rotor setup you would like for Rotor "
+                            "Two?(Please put an integer 0-25)";
 
   char *rotor_three_message =
-      " What is the Rotor setup you would like for Rotor "
-      "Three?(Please put an integer 0-25): ";
-  printf("\n%*s%s", format_string(rotor_three_message), "",
-         rotor_three_message);
-  int rotor_three_count;
-  scanf("%d", &rotor_three_count);
+      "What is the Rotor setup you would like for Rotor "
+      "Three?(Please put an integer 0-25)";
 
-  rotor_one->rotation_count = rotor_one_count;
-  rotor_two->rotation_count = rotor_two_count;
-  rotor_three->rotation_count = rotor_three_count;
+  printf("%*s%s: ", format_string(rotor_one_message), "", rotor_one_message);
+  scanf(" %d", &rotor_one_count);
+
+  printf("%*s%s: ", format_string(rotor_two_message), "", rotor_two_message);
+  scanf(" %d", &rotor_two_count);
+
+  printf("%*s%s: ", format_string(rotor_three_message), "",
+         rotor_three_message);
+  scanf(" %d", &rotor_three_count);
+
+  rotor_one->rotation_count = 0;
+  for (int i = 0; i < rotor_one_count; i++) {
+    rotateRotor(rotor_one);
+  }
+
+  rotor_two->rotation_count = 0;
+  for (int i = 0; i < rotor_two_count; i++) {
+    rotateRotor(rotor_two);
+  }
+
+  rotor_three->rotation_count = 0;
+  for (int i = 0; i < rotor_three_count; i++) {
+    rotateRotor(rotor_three);
+  }
 }
 
 /**
@@ -208,7 +220,6 @@ void changeRotors(struct Rotor *rotor_one, struct Rotor *rotor_two,
  * through the plug board, rotors, and reflector, and then back through the
  * rotors and plug board. The encoded message is printed to the console.
  */
-
 void encode(struct Rotor *rotor_one, struct Rotor *rotor_two,
             struct Rotor *rotor_three, char *message) {
   char encoded[256];
@@ -231,34 +242,20 @@ void encode(struct Rotor *rotor_one, struct Rotor *rotor_two,
 
   for (size_t i = 0; i < len; i++) {
     char originalChar = message[i];
-
     if (originalChar >= 'A' && originalChar <= 'Z') {
       char newChar = sendLetterThroughPlugBoard(&plugBoard, originalChar);
-      printf("plugboard encode forward: %c\n", newChar);
       newChar = sendLetterThroughRotor(rotor_one, newChar, true);
-      printf("rotor one encode forward: %c\n", newChar);
       newChar = sendLetterThroughRotor(rotor_two, newChar, true);
-      printf("rotor two encode forward: %c\n", newChar);
       newChar = sendLetterThroughRotor(rotor_three, newChar, true);
-      printf("rotor three encode forward: %c\n", newChar);
       newChar = sendLetterThroughReflector(&reflector, newChar);
-      printf("reflector encode forward: %c\n", newChar);
       newChar = sendLetterThroughRotor(rotor_three, newChar, false);
-      printf("rotor three encode back: %c\n", newChar);
       newChar = sendLetterThroughRotor(rotor_two, newChar, false);
-      printf("rotor two encode back: %c\n", newChar);
       newChar = sendLetterThroughRotor(rotor_one, newChar, false);
-      printf("rotor one encode back: %c\n", newChar);
       newChar = sendLetterThroughPlugBoard(&plugBoard, newChar);
-      printf("plugboard encode forward: %c\n", newChar);
       encoded[i] = newChar;
 
       // Rotate rotors
-      printf("Before Rotate: \n Side One: %s\n Side Two: %s\n",
-             rotor_one->side_one, rotor_one->side_two);
       rotateRotor(rotor_one);
-      printf("After Rotate: \n Side One: %s\n Side Two: %s\n",
-             rotor_one->side_one, rotor_one->side_two);
       if (rotor_one->rotation_count == 0) {
         rotateRotor(rotor_two);
         if (rotor_two->rotation_count == 0) {
@@ -341,6 +338,24 @@ void decode(struct Rotor *rotor_one, struct Rotor *rotor_two,
 
   decoded[len] = '\0';
   printf("\nDecoded Message: %s\n", decoded);
+}
+
+/**
+ * outputRotorSides - Outputs each rotor for logging/debugging purposes
+ *
+ * @rotor_one: A pointer to rotor one
+ * @rotor_two: A pointer to rotor two
+ * @rotor_three: A pointer to rotor three
+ *
+ * This function outputs each Rotor
+ */
+void outputRotorSides(struct Rotor *rotor_one, struct Rotor *rotor_two,
+                      struct Rotor *rotor_three) {
+  printf("Rotors Sides \n Rotor One: \n Side One: %s\n Side Two: %s\n"
+         "Rotor Two: \n Side One: %s\n Side Two: %s\n"
+         "Rotor Three: \n Side One: %s\n Side Two: %s\n",
+         rotor_one->side_one, rotor_one->side_two, rotor_two->side_one,
+         rotor_two->side_two, rotor_three->side_one, rotor_three->side_two);
 }
 
 /**

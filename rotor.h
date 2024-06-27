@@ -126,6 +126,18 @@ void changeRotors(struct Rotor *rotor_one, struct Rotor *rotor_two,
                   struct Rotor *rotor_three);
 
 /**
+ * outputRotorSides - Outputs each rotor for logging/debugging purposes
+ *
+ * @rotor_one: A pointer to rotor one
+ * @rotor_two: A pointer to rotor two
+ * @rotor_three: A pointer to rotor three
+ *
+ * This function outputs each Rotor
+ */
+void outputRotorSides(struct Rotor *rotor_one, struct Rotor *rotor_two,
+                      struct Rotor *rotor_three);
+
+/**
  * freeRotor - Frees the memory allocated for a rotor.
  *
  * @rotor: A pointer to the Rotor structure to be freed.

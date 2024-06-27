@@ -5,6 +5,7 @@
 #include "rotor.h"
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 // Defines the Rotor Size && Width
@@ -12,15 +13,11 @@
 #define WIDTH 100
 
 void enigma() {
-  printf("start of engima function");
   struct PlugBoard plugBoard;
   initializePlugBoard(&plugBoard);
 
   struct Rotor rotor_one = {"Rotor One", NULL, NULL, 0};
   initializeRotor(&rotor_one);
-  printf("This is rotor_one side at the beginning:\n Side One: %s\n Side Two: "
-         "%s\n",
-         rotor_one.side_one, rotor_one.side_two);
 
   struct Rotor rotor_two = {"Rotor Two", NULL, NULL, 0};
   initializeRotor(&rotor_two);
@@ -35,7 +32,6 @@ void enigma() {
   char *prompt;
 
   while (1) {
-    printf("start of while loop");
     int result = menu();
 
     switch (result) {
@@ -66,8 +62,6 @@ void enigma() {
       break;
 
     case 2:
-      outputRotors(&rotor_one, &rotor_two, &rotor_three);
-
       prompt = "What is your message that you want decrypted?: ";
       printf("%*s%s", format_string(prompt), "", prompt);
       if (!fgets(message, sizeof(message), stdin)) {
@@ -118,7 +112,6 @@ void enigma() {
 }
 
 int main() {
-  printf("engima starts");
   enigma();
   return 0;
 }
